@@ -1,0 +1,43 @@
+@font-face {
+  font-family: Retro;
+  src: url("./font.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+
+html,
+body {
+  font-family: "Retro", sans-serif;
+  font-size: 12vh;
+  margin: 0 auto;
+  padding: 0;
+  overflow: hidden;
+}
+
+.screen:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#input {
+  border: 1vh solid #000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-size: 20vh;
+  height: 100%;
+}
+
+#output {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  word-break: break-all;
+}
+
+footer {
+  margin-top: 3vh;
+  text-align: center;
+}
