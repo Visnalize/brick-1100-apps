@@ -5,11 +5,9 @@ var charset =
   "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+";
 var password = "";
 
-document.body.style.width = window.innerHeight * window.bridge.viewport.ratio + "px";
-document.body.style.height = window.innerHeight + "px";
-
 window.addEventListener("keydown", handleKeydown);
 window.bridge.on("keypress", handleKeypress);
+window.bridge.on("numpress", handleKeypress);
 
 function handleKeydown(e) {
   if (e.code === "Backspace") {
@@ -28,16 +26,16 @@ function handleKeydown(e) {
 }
 
 function handleKeypress(key) {
+  if (typeof key === "number" && input.textContent.length < 2) {
+    input.textContent += key;
+  }
+
   if (key === "clear") {
     if (input.textContent.length > 0) {
       input.textContent = input.textContent.slice(0, -1);
     } else {
       stop();
     }
-  }
-
-  if (typeof key === "number" && input.textContent.length < 2) {
-    input.textContent += key;
   }
 
   if (key === "ok") {
@@ -51,18 +49,18 @@ function handleKeypress(key) {
 
 function stop(data) {
   password = "";
-  window.bridge.send(window.parent, { event: "stop", data });
+  window.bridge.send(window.parent, { event: "stop", data: data });
 }
 
 function generatePassword() {
   var length = parseInt(input.textContent);
 
   for (var i = 0; i < length; i++) {
-    const randomIndex = Math.floor(Math.random() * charset.length);
+    var randomIndex = Math.floor(Math.random() * charset.length);
     password += charset.charAt(randomIndex);
   }
 
-  if (password.length > 20) {
+  if (password.length > 30) {
     return stop({ error: "Out of range" });
   }
 
