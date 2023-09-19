@@ -23,7 +23,7 @@ var ModeSelect = {
 
 var RouteIndex = {
   view: function () {
-    return [m(ModeSelect), m("footer", "Select")];
+    return [m("div", "Select mode:"), m(ModeSelect), m("footer", "Select")];
   },
 };
 
