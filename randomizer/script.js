@@ -91,10 +91,10 @@ function handleKeydown(event) {
       m.redraw();
     }
     if (event.code === "Enter") {
-      m.route.set(routes[routeIndex].href);
+      m.route.set(routes[routeIndex].href, null, { replace: true });
     }
   } else {
-    m.route.set("");
+    m.route.set("", null, { replace: true });
   }
 }
 
@@ -110,7 +110,7 @@ function handleKeypress(key) {
       m.redraw();
     }
     if (key === "ok") {
-      m.route.set(routes[routeIndex].href);
+      m.route.set(routes[routeIndex].href, null, { replace: true });
     }
     if (key === "clear") {
       window.bridge.send(window.parent, { event: "stop" });
@@ -119,7 +119,7 @@ function handleKeypress(key) {
     if (key === "clear") {
       window.bridge.send(window.parent, { event: "stop" });
     } else {
-      m.route.set("");
+      m.route.set("", null, { replace: true });
     }
   }
 }
