@@ -2,48 +2,23 @@ var activeScreen = null;
 var root = document.body;
 var height, weight;
 
-window.addEventListener("keydown", handleKeydown);
-window.bridge.on("keypress", handleKeypress);
-window.bridge.on("numpress", handleKeypress);
+window.addEventListener("keydown", handleEvent);
+window.bridge.on("keypress", handleEvent);
+window.bridge.on("numpress", handleEvent);
 
-function handleKeydown(event) {
-  var isNumber = event.code.includes("Digit");
-  var isEnter = event.code === "Enter";
-  var isClear = event.code === "Backspace";
-
-  if (activeScreen === "InputHeight") {
-    var heightInput = document.getElementById("height");
-    if (isNumber && heightInput.textContent.length < 4) {
-      heightInput.textContent += event.key;
-    }
-    if (isClear) {
-      heightInput.textContent = heightInput.textContent.slice(0, -1);
-    }
-    if (isEnter) {
-      height = Number(heightInput.textContent);
-      m.mount(root, InputWeight);
-    }
-  } else if (activeScreen === "InputWeight") {
-    var weightInput = document.getElementById("weight");
-    if (isNumber && weightInput.textContent.length < 4) {
-      weightInput.textContent += event.key;
-    }
-    if (isClear) {
-      weightInput.textContent = weightInput.textContent.slice(0, -1);
-    }
-    if (isEnter) {
-      weight = Number(weightInput.textContent);
-      m.mount(root, Result);
-    }
+function handleEvent(data) {
+  var isNumber, isEnter, isClear, key;
+  if (typeof data === "object" && data.type) {
+    isNumber = data.code.includes("Digit");
+    isEnter = data.code === "Enter";
+    isClear = data.code === "Backspace";
+    key = data.key;
   } else {
-    m.mount(root, InputHeight);
+    isNumber = data >= 0 && data <= 9;
+    isEnter = data === "ok";
+    isClear = data === "clear";
+    key = data;
   }
-}
-
-function handleKeypress(key) {
-  var isNumber = key >= 0 && key <= 9;
-  var isEnter = key === 'ok';
-  var isClear = key === 'clear';
 
   if (activeScreen === "InputHeight") {
     var heightInput = document.getElementById("height");
@@ -51,7 +26,11 @@ function handleKeypress(key) {
       heightInput.textContent += key;
     }
     if (isClear) {
-      heightInput.textContent = heightInput.textContent.slice(0, -1);
+      if (heightInput.textContent.length > 0) {
+        heightInput.textContent = heightInput.textContent.slice(0, -1);
+      } else {
+        stop();
+      }
     }
     if (isEnter) {
       height = Number(heightInput.textContent);
@@ -63,13 +42,18 @@ function handleKeypress(key) {
       weightInput.textContent += key;
     }
     if (isClear) {
-      weightInput.textContent = weightInput.textContent.slice(0, -1);
+      if (weightInput.textContent.length > 0) {
+        weightInput.textContent = weightInput.textContent.slice(0, -1);
+      } else {
+        m.mount(root, InputHeight);
+      }
     }
     if (isEnter) {
       weight = Number(weightInput.textContent);
       m.mount(root, Result);
     }
   } else {
+    height = weight = undefined;
     m.mount(root, InputHeight);
   }
 }
@@ -95,7 +79,7 @@ var InputHeight = {
     activeScreen = "InputHeight";
     return m("div.screen", [
       m("label", "Enter height (cm):"),
-      m("div#height.input"),
+      m("div#height.input", height),
       m("footer", "Next"),
     ]);
   },
@@ -106,14 +90,14 @@ var InputWeight = {
     activeScreen = "InputWeight";
     return m("div.screen", [
       m("label", "Enter weight (kg):"),
-      m("div#weight.input"),
+      m("div#weight.input", weight),
       m("footer", "Calculate"),
     ]);
   },
 };
 
 var Result = {
-  view: function (vnode) {
+  view: function () {
     activeScreen = "Result";
     var bmi = calculateBMI(height, weight);
     var category = categorizeBMI(bmi);
