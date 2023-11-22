@@ -33,7 +33,7 @@ function handleEvent(data) {
       }
     }
     if (isEnter) {
-      height = Number(heightInput.textContent);
+      height = heightInput.textContent;
       m.mount(root, InputWeight);
     }
   } else if (activeScreen === "InputWeight") {
@@ -49,7 +49,7 @@ function handleEvent(data) {
       }
     }
     if (isEnter) {
-      weight = Number(weightInput.textContent);
+      weight = weightInput.textContent;
       m.mount(root, Result);
     }
   } else {
@@ -63,8 +63,8 @@ function stop(data) {
 }
 
 function calculateBMI(height, weight) {
-  var heightInMeters = height / 100;
-  return (weight / (heightInMeters * heightInMeters)).toFixed(2);
+  var heightInMeters = Number(height) / 100;
+  return (Number(weight) / (heightInMeters * heightInMeters)).toFixed(2);
 }
 
 function categorizeBMI(bmi) {
@@ -101,6 +101,11 @@ var Result = {
     activeScreen = "Result";
     var bmi = calculateBMI(height, weight);
     var category = categorizeBMI(bmi);
+
+    if (isNaN(bmi)) {
+      stop({ error: "Invalid input" });
+    }
+
     return m("div.screen", [
       m("div", "Your BMI:"),
       m("div#result", [m("div", bmi), m("div", "(" + category + ")")]),
