@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Example App</title>
+    <link rel="stylesheet" href="https://unpkg.com/bridge-1100/dist/index.css">
+    <link rel="stylesheet" href="https://unpkg.com/bridge-1100/dist/font.css">
+    <style>
+        .screen:not([hidden]) {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .screen>*:not(footer) {
+            height: 100%;
+        }
+
+        .screen ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .screen li.active {
+            background-color: var(--c-black-alpha);
+            color: var(--c-trans);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="screen" id="intro">
+        <span>This is an example app to demo Bridge 1100's use. Select an option on the next page</span>
+        <footer>Next</footer>
+    </div>
+
+    <div class="screen" id="events" hidden>
+        <ul>
+            <li class="active">Keypad/numpad</li>
+            <li>Vibration (mobile)</li>
+        </ul>
+        <footer>Select</footer>
+    </div>
+
+    <div class="screen" id="event-keypad" hidden>
+        <div>Key pressed: <span id="key">--</span></div>
+        <div>(Hold any key to return)</div>
+    </div>
+
+    <div class="screen" id="event-haptics" hidden>
+        <ul>
+            <li class="active">Light</li>
+            <li>Medium</li>
+            <li>Heavy</li>
+        </ul>
+        <footer>Vibrate</footer>
+    </div>
+
+    <script src="https://unpkg.com/bridge-1100/dist/index.umd.js"></script>
+    <script>
+        var screens = document.querySelectorAll(".screen");
+        var screenMap = {
+            intro: document.querySelector("#intro"),
+            events: document.querySelector("#events"),
+            'event-keypad': document.querySelector("#event-keypad"),
+            'event-haptics': document.querySelector("#event-haptics"),
+        }
+        /** @type {keyof screenMap} */
+        var activeScreen = 'intro';
+        var activeSelection = 0;
+        var shakeIntensity = ['LIGHT', 'MEDIUM', 'HEAVY'];
+
+        /** @param {keyof screenMap} screenId */
+        function toggleScreen(screenId) {
+            screens.forEach(screen => screen.hidden = true);
+            screenMap[screenId].hidden = false;
+            activeScreen = screenId;
+            toggleSelection(0);
+        }
+
+        function toggleSelection(selection) {
+            var list = screenMap[activeScreen].querySelector('ul');
+            if (!list) return;
+            var items = list.querySelectorAll('li');
+            items.forEach(li => li.classList.remove('active'));
+            items[selection].classList.add('active');
+            activeSelection = selection;
+        }
+
+        function handleKeyPress(key) {
+            if (activeScreen === 'intro' && key === 'ok') {
+                toggleScreen('events');
+                return; // prevent fallthrough
+            }
+
+            if (activeScreen === 'events') {
+                if (key === 'up') {
+                    toggleSelection(activeSelection === 0 ? 1 : 0);
+                }
+                if (key === 'down') {
+                    toggleSelection(activeSelection === 1 ? 0 : 1);
+                }
+                if (key === 'ok') {
+                    if (activeSelection === 0) {
+                        toggleScreen('event-keypad');
+                    }
+                    if (activeSelection === 1) {
+                        toggleScreen('event-haptics');
+                    }
+                }
+                if (key === 'clear') {
+                    toggleScreen('intro');
+                }
+                return; // prevent fallthrough
+            }
+
+            if (activeScreen === 'event-keypad') {
+                document.querySelector("#key").textContent = key;
+                return; // prevent fallthrough
+            }
+
+            if (activeScreen === 'event-haptics') {
+                if (key === 'up') {
+                    toggleSelection(activeSelection === 0 ? 2 : activeSelection - 1);
+                }
+                if (key === 'down') {
+                    toggleSelection(activeSelection === 2 ? 0 : activeSelection + 1);
+                }
+                if (key === 'ok') {
+                    window.bridge.send(window.parent, { event: "shake", data: shakeIntensity[activeSelection] });
+                }
+                if (key === 'clear') {
+                    toggleScreen('events');
+                }
+            }
+        }
+
+        function handleKeyHold(key) {
+            if (activeScreen === 'event-keypad') {
+                toggleScreen('events');
+            }
+        }
+
+
+        window.bridge.on("keypress", handleKeyPress);
+        window.bridge.on("numpress", handleKeyPress);
+        window.bridge.on('keyhold', handleKeyHold);
+        window.bridge.on('numhold', handleKeyHold);
+    </script>
+</body>
+
+</html>
