@@ -1,0 +1,26 @@
+.screen:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#input {
+  border: 2vh solid #000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  font-size: 20vh;
+  height: 100%;
+}
+
+#output {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  word-break: break-all;
+}
+
+footer {
+  font-size: 12vh;
+}
