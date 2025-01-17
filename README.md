@@ -8,6 +8,8 @@ To make your app's interface fit seamlessly into Brick 1100, there's a [Bridge 1
 
 ## How to build your own app
 
+> For more detailed, step-by-step instructions, refer to [this guide](https://visnalize.com/brick1100/builders/building-app).
+
 1. Fork this repo.
 2. Clone your forked repo to your local machine.
 3. Create a new folder and name it as your app's name.
