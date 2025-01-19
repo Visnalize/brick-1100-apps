@@ -21,6 +21,4 @@ Once your pull request is merged, your app will show up at `https://brick1100-ap
 
 ## App list
 
-- [Bmi Calculator](https://brick1100-apps.visnalize.com/bim-calculator)
-- [Pwd Generator](https://brick1100-apps.visnalize.com/pwd-generator)
-- [Randomizer](https://brick1100-apps.visnalize.com/randomizer)
+> See the [index page](https://brick1100-apps.visnalize.com)
