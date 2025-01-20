@@ -5,22 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Brick 1100 Apps</title>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <link rel="icon" href="https://brick1100.visnalize.com/favicon.png">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.2/css/bulma.min.css">
     <style>
-        .container {
-            padding: 4rem 2rem;
-        }
-
-        ul {
-            list-style: none;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 2rem;
-            text-align: center;
-        }
-
         iframe {
             --height: 400px;
             height: var(--height);
@@ -30,9 +17,24 @@
 </head>
 
 <body>
-    <div class="container">
-        <h1>Brick 1100 Apps</h1>
-        <ul id="list"></ul>
+    <div class="container is-max-desktop">
+        <section class="hero">
+            <div class="hero-body">
+                <h1 class="title is-size-1 has-text-centered">Brick 1100 Apps</h1>
+                <div class="grid is-col-min-12">
+                    <div class="cell">
+                        <a class="button is-primary is-large is-fullwidth"
+                            href="https://visnalize.com/brick1100/builders/building-app" target="_blank">How to build an
+                            app</a>
+                    </div>
+                    <div class="cell">
+                        <a class="button is-primary is-outlined is-large is-fullwidth"
+                            href="https://github.com/Visnalize/brick-1100-apps" target="_blank">Source code</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="section" id="list"></section>
     </div>
 
     <script src="https://unpkg.com/mithril/mithril.js"></script>
@@ -42,7 +44,15 @@
         const previewerUrl = "https://brick1100.visnalize.com/#/online/previewer";
 
         fetch("https://api.github.com/repos/Visnalize/brick-1100-apps/contents")
-            .then((response) => response.json())
+            .then((response) => {
+                if (response.ok && response.status === 200) {
+                    return response.json();
+                }
+                m.render(list, m("div.cell.has-text-centered", [
+                    m("h2.is-size-3", "Failed to fetch data"),
+                    m("p", "Please try again later"),
+                ]));
+            })
             .then((data) => {
                 const items = data
                     .filter((item) => item.type === "dir")
@@ -55,16 +65,16 @@
                             src: `${previewerUrl}?url=${gameUrl}/${item.name}`,
                             frameborder: "0",
                         });
-                        return m("li", [
-                            m("a", {
+                        return m("div.cell.has-text-centered.mb-6", [
+                            iframe,
+                            m("a.button.is-text.is-block", {
                                 href: `${gameUrl}/${item.name}`,
                                 target: "_blank",
-                            }, m("h2", name)),
-                            iframe,
+                            }, m("h2.is-size-4.is-size-3-desktop", name)),
                         ]);
                     });
-                m.render(list, items);
-            });
+                m.render(list, m('div.grid.is-col-min-10.is-gap-4', items));
+            })
     </script>
 </body>
 
