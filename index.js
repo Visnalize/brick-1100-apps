@@ -67,18 +67,4 @@ function init(type) {
   } else {
     fetchData();
   }
-
-  document.querySelectorAll("iframe").forEach((iframe) => {
-    bridge.send(iframe.contentWindow, {
-      event: "_init",
-      data: {
-        "vw-ratio": 1.3070696471734529,
-        color: {
-          root: { fg: "#a3b65c", bg: "#000000e6" },
-          inactive: { fg: "#4e5f46" },
-          night: { fg: "#6b762d", inactive: { fg: "#1c2119" } },
-        },
-      },
-    });
-  });
 }
