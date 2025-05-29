@@ -1,0 +1,18 @@
+.frame {
+  position: relative;
+  width: 220px;
+}
+
+.frame img {
+  position: relative;
+  pointer-events: none;
+}
+
+.frame iframe {
+  position: absolute;
+  inset: 0;
+  width: 86%;
+  height: 90%;
+  margin: auto;
+  border-radius: 32px;
+}
