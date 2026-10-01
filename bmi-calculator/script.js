@@ -1,65 +1,7 @@
-var activeScreen = null;
-var root = document.body;
-var height, weight;
+var ui = window.bridge.ui;
 
-window.addEventListener("keydown", handleEvent);
-window.bridge.on("keypress", handleEvent);
-window.bridge.on("numpress", handleEvent);
-
-function handleEvent(data) {
-  var isNumber, isEnter, isClear, key;
-  if (typeof data === "object" && data.type) {
-    isNumber = data.code.includes("Digit");
-    isEnter = data.code === "Enter";
-    isClear = data.code === "Backspace";
-    key = data.key;
-  } else {
-    isNumber = data >= 0 && data <= 9;
-    isEnter = data === "ok";
-    isClear = data === "clear";
-    key = data;
-  }
-
-  if (activeScreen === "InputHeight") {
-    var heightInput = document.getElementById("height");
-    if (isNumber && heightInput.textContent.length < 4) {
-      heightInput.textContent += key;
-    }
-    if (isClear) {
-      if (heightInput.textContent.length > 0) {
-        heightInput.textContent = heightInput.textContent.slice(0, -1);
-      } else {
-        stop();
-      }
-    }
-    if (isEnter) {
-      height = heightInput.textContent;
-      m.mount(root, InputWeight);
-    }
-  } else if (activeScreen === "InputWeight") {
-    var weightInput = document.getElementById("weight");
-    if (isNumber && weightInput.textContent.length < 4) {
-      weightInput.textContent += key;
-    }
-    if (isClear) {
-      if (weightInput.textContent.length > 0) {
-        weightInput.textContent = weightInput.textContent.slice(0, -1);
-      } else {
-        m.mount(root, InputHeight);
-      }
-    }
-    if (isEnter) {
-      weight = weightInput.textContent;
-      m.mount(root, Result);
-    }
-  } else {
-    height = weight = undefined;
-    m.mount(root, InputHeight);
-  }
-}
-
-function stop(data) {
-  window.bridge.send(window.parent, { event: "stop", data: data });
+function stop() {
+  window.bridge.send(window.parent, { event: "stop" });
 }
 
 function calculateBMI(height, weight) {
@@ -74,44 +16,42 @@ function categorizeBMI(bmi) {
   return "Obese";
 }
 
-var InputHeight = {
-  view: function () {
-    activeScreen = "InputHeight";
-    return m("div.screen", [
-      m("label", "Enter height (cm):"),
-      m("div#height.input", height),
-      m("footer", "Next"),
-    ]);
-  },
-};
+function askHeight() {
+  ui.number({
+    title: "Height (cm):",
+    maxLength: 3,
+    action: "Next",
+    onDone: function (height) {
+      if (!Number(height)) return ui.result({ type: "fail", message: "Enter your height" });
+      askWeight(height);
+    },
+    onBack: stop,
+  });
+}
 
-var InputWeight = {
-  view: function () {
-    activeScreen = "InputWeight";
-    return m("div.screen", [
-      m("label", "Enter weight (kg):"),
-      m("div#weight.input", weight),
-      m("footer", "Calculate"),
-    ]);
-  },
-};
+// Clear on an empty field closes this screen, which shows the height again.
+function askWeight(height) {
+  ui.number({
+    title: "Weight (kg):",
+    maxLength: 3,
+    action: "Calculate",
+    onDone: function (weight) {
+      if (!Number(weight)) return ui.result({ type: "fail", message: "Enter your weight" });
+      showResult(height, weight);
+    },
+  });
+}
 
-var Result = {
-  view: function () {
-    activeScreen = "Result";
-    var bmi = calculateBMI(height, weight);
-    var category = categorizeBMI(bmi);
+function showResult(height, weight) {
+  var bmi = calculateBMI(height, weight);
+  ui.confirm({
+    text: bmi,
+    info: categorizeBMI(bmi),
+    onDone: function () {
+      ui.closeAll();
+      askHeight();
+    },
+  });
+}
 
-    if (isNaN(bmi)) {
-      stop({ error: "Invalid input" });
-    }
-
-    return m("div.screen", [
-      m("div", "Your BMI:"),
-      m("div#result", [m("div", bmi), m("div", "(" + category + ")")]),
-      m("footer", "OK"),
-    ]);
-  },
-};
-
-m.mount(root, InputHeight);
+askHeight();
