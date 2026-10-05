@@ -8,11 +8,24 @@ function stop() {
   window.bridge.send(window.parent, { event: "stop" });
 }
 
+/**
+ * A random index below `max` from the browser's secure random numbers. Math.random is not made for
+ * passwords. Values past the last whole multiple of `max` are drawn again, so every index is as
+ * likely as any other.
+ */
+function randomIndex(max) {
+  var limit = 256 - (256 % max);
+  var byte = new Uint8Array(1);
+  do {
+    window.crypto.getRandomValues(byte);
+  } while (byte[0] >= limit);
+  return byte[0] % max;
+}
+
 function generatePassword(length) {
   var password = "";
   for (var i = 0; i < length; i++) {
-    var randomIndex = Math.floor(Math.random() * charset.length);
-    password += charset.charAt(randomIndex);
+    password += charset.charAt(randomIndex(charset.length));
   }
   return password;
 }

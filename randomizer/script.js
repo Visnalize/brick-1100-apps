@@ -19,14 +19,33 @@ function pick(mode) {
   return String(randomize(mode.range[0], mode.range[1]));
 }
 
+// OK picks again. The screen goes blank for a moment first, so that a pick equal to the last one
+// still shows that something happened.
+function showPick(mode) {
+  ui.text({
+    title: mode.result,
+    text: pick(mode),
+    action: "Again",
+    onDone: function (screen) {
+      screen.close();
+      // Keys do nothing on the blank screen, which closes by itself
+      var noop = function () {};
+      var blank = ui.text({ title: mode.result, text: " ", action: "Again", onDone: noop, onBack: noop });
+      setTimeout(function () {
+        blank.close();
+        showPick(mode);
+      }, 250);
+    },
+  });
+}
+
 ui.list({
   title: "Randomizer",
   items: modes.map(function (mode) {
     return mode.title;
   }),
   onSelect: function (index) {
-    var mode = modes[index];
-    ui.text({ title: mode.result, text: pick(mode) });
+    showPick(modes[index]);
   },
   onBack: function () {
     window.bridge.send(window.parent, { event: "stop" });
