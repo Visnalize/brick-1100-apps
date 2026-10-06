@@ -6,13 +6,14 @@ function stop() {
 
 function calculateBMI(height, weight) {
   var heightInMeters = Number(height) / 100;
-  return (Number(weight) / (heightInMeters * heightInMeters)).toFixed(2);
+  return Number(weight) / (heightInMeters * heightInMeters);
 }
 
+// The WHO ranges: 18.5 to 24.9 is normal, 25 to 29.9 overweight, 30 and above obese
 function categorizeBMI(bmi) {
   if (bmi < 18.5) return "Underweight";
-  if (bmi < 24.9) return "Normal weight";
-  if (bmi < 29.9) return "Overweight";
+  if (bmi < 25) return "Normal weight";
+  if (bmi < 30) return "Overweight";
   return "Obese";
 }
 
@@ -43,9 +44,10 @@ function askWeight(height) {
 }
 
 function showResult(height, weight) {
-  var bmi = calculateBMI(height, weight);
+  // Rounded first, so that the category matches the number shown
+  var bmi = Number(calculateBMI(height, weight).toFixed(1));
   ui.confirm({
-    text: bmi,
+    text: bmi.toFixed(1),
     info: categorizeBMI(bmi),
     onDone: function () {
       ui.closeAll();
